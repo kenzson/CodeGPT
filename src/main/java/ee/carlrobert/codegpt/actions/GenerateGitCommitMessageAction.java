@@ -4,6 +4,7 @@ import static com.intellij.openapi.ui.Messages.OK;
 import static com.intellij.util.ObjectUtils.tryCast;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
 import static java.util.stream.Collectors.joining;
+import static ee.carlrobert.codegpt.Icons.Default;
 
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
@@ -17,11 +18,15 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.ui.popup.Balloon;
 import com.intellij.openapi.vcs.FilePath;
+import com.intellij.openapi.vcs.ProjectLevelVcsManager;
 import com.intellij.openapi.vcs.VcsDataKeys;
 import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.ui.CommitMessage;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.ui.AnimatedIcon;
 import com.intellij.vcs.commit.CommitWorkflowUi;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.EncodingManager;
@@ -84,10 +89,16 @@ public class GenerateGitCommitMessageAction extends AnAction {
       return;
     }
 
-    var gitDiff = getGitDiff(event, project);
-    var tokenCount = encodingManager.countTokens(gitDiff);
+    String diff = "";
+    if ("svn".equals(ProjectLevelVcsManager.getInstance(project).getSingleVCS().getName())) {
+      diff = getSvnDiff(event, project);
+    } else {
+      diff = getGitDiff(event, project);
+    }
+
+    var tokenCount = encodingManager.countTokens(diff);
     if (tokenCount > MAX_TOKEN_COUNT_WARNING
-        && OverlayUtil.showTokenSoftLimitWarningDialog(tokenCount) != OK) {
+            && OverlayUtil.showTokenSoftLimitWarningDialog(tokenCount) != OK) {
       return;
     }
 
@@ -95,10 +106,10 @@ public class GenerateGitCommitMessageAction extends AnAction {
     if (editor != null) {
       ((EditorEx) editor).setCaretVisible(false);
       CompletionRequestService.getInstance()
-          .generateCommitMessageAsync(
-              project.getService(CommitMessageTemplate.class).getSystemPrompt(),
-              gitDiff,
-              getEventListener(project, editor.getDocument()));
+              .generateCommitMessageAsync(
+                      project.getService(CommitMessageTemplate.class).getSystemPrompt(),
+                      diff,
+                      getEventListener(project, editor.getDocument()));
     }
   }
 
@@ -170,6 +181,35 @@ public class GenerateGitCommitMessageAction extends AnAction {
         .collect(joining("\n"));
   }
 
+  private String getSvnDiff(AnActionEvent event, Project project) {
+    var commitWorkflowUi = Optional.ofNullable(event.getData(VcsDataKeys.COMMIT_WORKFLOW_UI))
+            .orElseThrow(() -> new IllegalStateException("Could not retrieve commit workflow ui."));
+    var changes = new CommitWorkflowChanges(commitWorkflowUi);
+    var projectBasePath = project.getBasePath();
+    var svnDiff = getSvnDiff(projectBasePath, changes.getIncludedVersionedFilePaths());
+    var newFilesContent =
+            getNewFilesDiff(projectBasePath, changes.getIncludedUnversionedFilePaths());
+
+    return Map.of(
+                    "Svn diff", svnDiff,
+                    "New files", newFilesContent)
+            .entrySet().stream()
+            .filter(entry -> !entry.getValue().isEmpty())
+            .map(entry -> "%s:%n%s".formatted(entry.getKey(), entry.getValue()))
+            .collect(joining("\n\n"));
+  }
+
+  private String getSvnDiff(String projectPath, List<String> filePaths) {
+    if (filePaths.isEmpty()) {
+      return "";
+    }
+
+    var process = createSvnDiffProcess(projectPath, filePaths);
+    return new BufferedReader(new InputStreamReader(process.getInputStream()))
+            .lines()
+            .collect(joining("\n"));
+  }
+
   private String getNewFilesDiff(String projectPath, List<String> filePaths) {
     return filePaths.stream()
         .map(pathString -> {
@@ -200,6 +240,21 @@ public class GenerateGitCommitMessageAction extends AnAction {
       return processBuilder.start();
     } catch (IOException ex) {
       throw new RuntimeException("Unable to start git diff process", ex);
+    }
+  }
+
+  private Process createSvnDiffProcess(String projectPath, List<String> filePaths) {
+    var command = new ArrayList<String>();
+    command.add("svn");
+    command.add("diff");
+    command.addAll(filePaths);
+
+    var processBuilder = new ProcessBuilder(command);
+    processBuilder.directory(new File(projectPath));
+    try {
+      return processBuilder.start();
+    } catch (IOException ex) {
+      throw new RuntimeException("Unable to start svn diff process", ex);
     }
   }
 
