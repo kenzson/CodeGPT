@@ -4,7 +4,6 @@ import static com.intellij.openapi.ui.Messages.OK;
 import static com.intellij.util.ObjectUtils.tryCast;
 import static ee.carlrobert.codegpt.settings.service.ServiceType.YOU;
 import static java.util.stream.Collectors.joining;
-import static ee.carlrobert.codegpt.Icons.Default;
 
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
@@ -18,15 +17,12 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.ui.popup.Balloon;
 import com.intellij.openapi.vcs.FilePath;
 import com.intellij.openapi.vcs.ProjectLevelVcsManager;
 import com.intellij.openapi.vcs.VcsDataKeys;
 import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.ui.CommitMessage;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.ui.AnimatedIcon;
 import com.intellij.vcs.commit.CommitWorkflowUi;
 import ee.carlrobert.codegpt.CodeGPTBundle;
 import ee.carlrobert.codegpt.EncodingManager;
@@ -89,8 +85,8 @@ public class GenerateGitCommitMessageAction extends AnAction {
       return;
     }
 
-    String diff = "";
-    if ("svn".equals(ProjectLevelVcsManager.getInstance(project).getSingleVCS().getName())) {
+    String diff;
+    if ("svn".equals(Objects.requireNonNull(ProjectLevelVcsManager.getInstance(project).getSingleVCS()).getName())) {
       diff = getSvnDiff(event, project);
     } else {
       diff = getGitDiff(event, project);
