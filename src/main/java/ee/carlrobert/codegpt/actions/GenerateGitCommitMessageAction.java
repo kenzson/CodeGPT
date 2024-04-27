@@ -86,7 +86,9 @@ public class GenerateGitCommitMessageAction extends AnAction {
     }
 
     String diff;
-    if ("svn".equals(Objects.requireNonNull(ProjectLevelVcsManager.getInstance(project).getSingleVCS()).getName())) {
+    if ("svn".equals(
+        Objects.requireNonNull(ProjectLevelVcsManager.getInstance(project).getSingleVCS())
+            .getName())) {
       diff = getSvnDiff(event, project);
     } else {
       diff = getGitDiff(event, project);
@@ -94,7 +96,7 @@ public class GenerateGitCommitMessageAction extends AnAction {
 
     var tokenCount = encodingManager.countTokens(diff);
     if (tokenCount > MAX_TOKEN_COUNT_WARNING
-            && OverlayUtil.showTokenSoftLimitWarningDialog(tokenCount) != OK) {
+        && OverlayUtil.showTokenSoftLimitWarningDialog(tokenCount) != OK) {
       return;
     }
 
@@ -102,10 +104,10 @@ public class GenerateGitCommitMessageAction extends AnAction {
     if (editor != null) {
       ((EditorEx) editor).setCaretVisible(false);
       CompletionRequestService.getInstance()
-              .generateCommitMessageAsync(
-                      project.getService(CommitMessageTemplate.class).getSystemPrompt(),
-                      diff,
-                      getEventListener(project, editor.getDocument()));
+          .generateCommitMessageAsync(
+              project.getService(CommitMessageTemplate.class).getSystemPrompt(),
+              diff,
+              getEventListener(project, editor.getDocument()));
     }
   }
 
@@ -179,20 +181,20 @@ public class GenerateGitCommitMessageAction extends AnAction {
 
   private String getSvnDiff(AnActionEvent event, Project project) {
     var commitWorkflowUi = Optional.ofNullable(event.getData(VcsDataKeys.COMMIT_WORKFLOW_UI))
-            .orElseThrow(() -> new IllegalStateException("Could not retrieve commit workflow ui."));
+        .orElseThrow(() -> new IllegalStateException("Could not retrieve commit workflow ui."));
     var changes = new CommitWorkflowChanges(commitWorkflowUi);
     var projectBasePath = project.getBasePath();
     var svnDiff = getSvnDiff(projectBasePath, changes.getIncludedVersionedFilePaths());
     var newFilesContent =
-            getNewFilesDiff(projectBasePath, changes.getIncludedUnversionedFilePaths());
+        getNewFilesDiff(projectBasePath, changes.getIncludedUnversionedFilePaths());
 
     return Map.of(
-                    "Svn diff", svnDiff,
-                    "New files", newFilesContent)
-            .entrySet().stream()
-            .filter(entry -> !entry.getValue().isEmpty())
-            .map(entry -> "%s:%n%s".formatted(entry.getKey(), entry.getValue()))
-            .collect(joining("\n\n"));
+            "Svn diff", svnDiff,
+            "New files", newFilesContent)
+        .entrySet().stream()
+        .filter(entry -> !entry.getValue().isEmpty())
+        .map(entry -> "%s:%n%s".formatted(entry.getKey(), entry.getValue()))
+        .collect(joining("\n\n"));
   }
 
   private String getSvnDiff(String projectPath, List<String> filePaths) {
@@ -202,8 +204,8 @@ public class GenerateGitCommitMessageAction extends AnAction {
 
     var process = createSvnDiffProcess(projectPath, filePaths);
     return new BufferedReader(new InputStreamReader(process.getInputStream()))
-            .lines()
-            .collect(joining("\n"));
+        .lines()
+        .collect(joining("\n"));
   }
 
   private String getNewFilesDiff(String projectPath, List<String> filePaths) {
