@@ -7,13 +7,13 @@ import ee.carlrobert.codegpt.completions.llama.LlamaModel
 import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey
 import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
 import ee.carlrobert.codegpt.settings.configuration.Placeholder
+import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettingsState
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings
 import ee.carlrobert.codegpt.settings.service.openai.OpenAISettings
 import ee.carlrobert.llm.client.llama.completion.LlamaCompletionRequest
-import ee.carlrobert.llm.client.llama.completion.LlamaInfillRequest
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaCompletionRequest
 import ee.carlrobert.llm.client.ollama.completion.request.OllamaParameters
 import ee.carlrobert.llm.client.openai.completion.request.OpenAITextCompletionRequest
@@ -23,6 +23,18 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.nio.charset.StandardCharsets
 
 object CodeCompletionRequestFactory {
+
+    @JvmStatic
+    fun buildCodeGPTRequest(details: InfillRequestDetails): OpenAITextCompletionRequest {
+        val settings = service<CodeGPTServiceSettings>().state.codeCompletionSettings
+        return OpenAITextCompletionRequest.Builder(details.prefix)
+            .setSuffix(details.suffix)
+            .setStream(true)
+            .setModel(settings.model)
+            .setMaxTokens(settings.maxTokens)
+            .setTemperature(0.4)
+            .build()
+    }
 
     @JvmStatic
     fun buildOpenAIRequest(details: InfillRequestDetails): OpenAITextCompletionRequest {
@@ -82,16 +94,16 @@ object CodeCompletionRequestFactory {
     }
 
     @JvmStatic
-    fun buildLlamaRequest(details: InfillRequestDetails): LlamaInfillRequest {
+    fun buildLlamaRequest(details: InfillRequestDetails): LlamaCompletionRequest {
         val settings = LlamaSettings.getCurrentState()
         val promptTemplate = getLlamaInfillPromptTemplate(settings)
-        return LlamaInfillRequest(
-            LlamaCompletionRequest.Builder(null)
-                .setN_predict(settings.codeCompletionMaxTokens)
-                .setStream(true)
-                .setTemperature(0.4)
-                .setStop(promptTemplate.stopTokens), details.prefix, details.suffix
-        )
+        val prompt = promptTemplate.buildPrompt(details.prefix, details.suffix)
+        return LlamaCompletionRequest.Builder(prompt)
+            .setN_predict(settings.codeCompletionMaxTokens)
+            .setStream(true)
+            .setTemperature(0.4)
+            .setStop(promptTemplate.stopTokens)
+            .build()
     }
 
     fun buildOllamaRequest(details: InfillRequestDetails): OllamaCompletionRequest {

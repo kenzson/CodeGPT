@@ -4,9 +4,10 @@ import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.DumbAwareAction
+import ee.carlrobert.codegpt.codecompletions.CodeCompletionService
 import ee.carlrobert.codegpt.settings.GeneralSettings
-import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.settings.service.ServiceType.*
+import ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceSettings
 import ee.carlrobert.codegpt.settings.service.custom.CustomServiceSettings
 import ee.carlrobert.codegpt.settings.service.llama.LlamaSettings
 import ee.carlrobert.codegpt.settings.service.ollama.OllamaSettings
@@ -18,6 +19,9 @@ abstract class CodeCompletionFeatureToggleActions(
 
     override fun actionPerformed(e: AnActionEvent) {
         when (GeneralSettings.getCurrentState().selectedService) {
+            CODEGPT ->
+                service<CodeGPTServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled
+
             OPENAI ->
                 OpenAISettings.getCurrentState().isCodeCompletionsEnabled = enableFeatureAction
 
@@ -32,6 +36,7 @@ abstract class CodeCompletionFeatureToggleActions(
             ANTHROPIC,
             AZURE,
             YOU,
+            GOOGLE,
             null -> { /* no-op for these services */
             }
         }
@@ -39,9 +44,11 @@ abstract class CodeCompletionFeatureToggleActions(
 
     override fun update(e: AnActionEvent) {
         val selectedService = GeneralSettings.getCurrentState().selectedService
-        val codeCompletionEnabled = isCodeCompletionsEnabled(selectedService)
+        val codeCompletionEnabled =
+            service<CodeCompletionService>().isCodeCompletionsEnabled(selectedService)
         e.presentation.isVisible = codeCompletionEnabled != enableFeatureAction
         e.presentation.isEnabled = when (selectedService) {
+            CODEGPT,
             OPENAI,
             CUSTOM_OPENAI,
             LLAMA_CPP,
@@ -50,24 +57,13 @@ abstract class CodeCompletionFeatureToggleActions(
             ANTHROPIC,
             AZURE,
             YOU,
+            GOOGLE,
             null -> false
         }
     }
 
     override fun getActionUpdateThread(): ActionUpdateThread {
         return ActionUpdateThread.BGT
-    }
-
-    private fun isCodeCompletionsEnabled(serviceType: ServiceType): Boolean {
-        return when (serviceType) {
-            OPENAI -> OpenAISettings.getCurrentState().isCodeCompletionsEnabled
-            CUSTOM_OPENAI -> service<CustomServiceSettings>().state.codeCompletionSettings.codeCompletionsEnabled
-            LLAMA_CPP -> LlamaSettings.isCodeCompletionsPossible()
-            OLLAMA -> service<OllamaSettings>().state.codeCompletionsEnabled
-            ANTHROPIC,
-            AZURE,
-            YOU -> false
-        }
     }
 }
 
