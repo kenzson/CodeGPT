@@ -8,22 +8,26 @@ import com.intellij.ui.components.JBPasswordField
 import com.intellij.util.ui.FormBuilder
 import com.intellij.util.ui.UI
 import ee.carlrobert.codegpt.CodeGPTBundle
-import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey
+import ee.carlrobert.codegpt.credentials.CredentialsStore.CredentialKey.GOOGLE_API_KEY
 import ee.carlrobert.codegpt.credentials.CredentialsStore.getCredential
 import ee.carlrobert.codegpt.ui.UIUtil
 import ee.carlrobert.llm.client.google.models.GoogleModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import javax.swing.JPanel
 import javax.swing.event.HyperlinkEvent
 
 class GoogleSettingsForm {
+
     private val apiKeyField = JBPasswordField()
     private val completionModelComboBox: ComboBox<GoogleModel>
 
     init {
         val state = service<GoogleSettings>().state
         apiKeyField.columns = 30
-        apiKeyField.text =
-            getCredential(CredentialKey.GOOGLE_API_KEY)
+        apiKeyField.text = runBlocking(Dispatchers.IO) {
+            getCredential(GOOGLE_API_KEY)
+        }
         completionModelComboBox = ComboBox(
             EnumComboBoxModel(GoogleModel::class.java)
         )
@@ -67,20 +71,19 @@ class GoogleSettingsForm {
     fun getApiKey(): String? = String(apiKeyField.password).ifEmpty { null }
 
     fun getModel(): String = (completionModelComboBox.model
-            .selectedItem as GoogleModel)
-            .code
+        .selectedItem as GoogleModel)
+        .code
 
     fun getCurrentState() = GoogleSettingsState().apply { model = getModel() }
 
     fun resetForm() {
         val state = service<GoogleSettings>().state
-        apiKeyField.text =
-            getCredential(CredentialKey.GOOGLE_API_KEY)
+        apiKeyField.text = getCredential(GOOGLE_API_KEY)
         completionModelComboBox.selectedItem = GoogleModel.findByCode(state.model)
     }
 
     fun isModified(): Boolean = service<GoogleSettings>().state.run {
-        model != getModel() || getApiKey() != getCredential(CredentialKey.GOOGLE_API_KEY)
+        model != getModel() || getApiKey() != getCredential(GOOGLE_API_KEY)
     }
 
     fun applyChanges() {
@@ -88,5 +91,4 @@ class GoogleSettingsForm {
             model = getModel()
         }
     }
-
 }
