@@ -98,14 +98,13 @@ public class GenerateGitCommitMessageAction extends AnAction {
       return;
     }
 
-    var editor = getCommitMessageEditor(event);
-    if (editor != null) {
-      ((EditorEx) editor).setCaretVisible(false);
+    var commitWorkflowUi = event.getData(VcsDataKeys.COMMIT_WORKFLOW_UI);
+    if (commitWorkflowUi != null) {
       CompletionRequestService.getInstance()
           .generateCommitMessageAsync(
               project.getService(CommitMessageTemplate.class).getSystemPrompt(),
               diff,
-              getEventListener(project, editor.getDocument()));
+              getEventListener(project, commitWorkflowUi));
     }
   }
 
@@ -114,7 +113,9 @@ public class GenerateGitCommitMessageAction extends AnAction {
     return ActionUpdateThread.EDT;
   }
 
-  private CompletionEventListener<String> getEventListener(Project project, Document document) {
+  private CompletionEventListener<String> getEventListener(
+      Project project,
+      CommitWorkflowUi commitWorkflowUi) {
     return new CompletionEventListener<>() {
       private final StringBuilder messageBuilder = new StringBuilder();
 
@@ -125,7 +126,7 @@ public class GenerateGitCommitMessageAction extends AnAction {
         application.invokeLater(() ->
             application.runWriteAction(() ->
                 WriteCommandAction.runWriteCommandAction(project, () ->
-                    document.setText(messageBuilder))));
+                    commitWorkflowUi.getCommitMessageUi().setText(messageBuilder.toString()))));
       }
 
       @Override
@@ -137,13 +138,6 @@ public class GenerateGitCommitMessageAction extends AnAction {
             NotificationType.ERROR));
       }
     };
-  }
-
-  private Editor getCommitMessageEditor(AnActionEvent event) {
-    var commitMessage = tryCast(
-        event.getData(VcsDataKeys.COMMIT_MESSAGE_CONTROL),
-        CommitMessage.class);
-    return commitMessage != null ? commitMessage.getEditorField().getEditor() : null;
   }
 
   private String getGitDiff(AnActionEvent event, Project project) {
