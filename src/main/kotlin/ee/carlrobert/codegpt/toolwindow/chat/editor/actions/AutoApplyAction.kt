@@ -26,8 +26,6 @@ import ee.carlrobert.codegpt.Icons
 import ee.carlrobert.codegpt.actions.ActionType
 import ee.carlrobert.codegpt.actions.TrackableAction
 import ee.carlrobert.codegpt.completions.CompletionClientProvider
-import ee.carlrobert.codegpt.settings.GeneralSettings
-import ee.carlrobert.codegpt.settings.service.ServiceType
 import ee.carlrobert.codegpt.ui.OverlayUtil
 import ee.carlrobert.codegpt.util.EditorDiffUtil.createDiffRequest
 import ee.carlrobert.codegpt.util.EditorUtil
@@ -56,12 +54,7 @@ class AutoApplyAction(
     }
 
     override fun update(e: AnActionEvent) {
-        val isCodeGPTSelected = GeneralSettings.getSelectedService() == ServiceType.CODEGPT
-        if (isCodeGPTSelected) {
-            validateAndUpdatePresentation(e)
-        } else {
-            e.presentation.disableAction(CodeGPTBundle.get("toolwindow.chat.editor.action.autoApply.disabledTitle"))
-        }
+        validateAndUpdatePresentation(e)
     }
 
     override fun handleAction(event: AnActionEvent) {

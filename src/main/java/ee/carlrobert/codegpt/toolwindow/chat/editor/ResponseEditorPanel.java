@@ -11,6 +11,7 @@ import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.openapi.actionSystem.toolbarLayout.ToolbarLayoutStrategy;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
@@ -193,7 +194,7 @@ public class ResponseEditorPanel extends JPanel implements Disposable {
         }
       }
     });
-    toolbar.setLayoutPolicy(ActionToolbar.NOWRAP_LAYOUT_POLICY);
+    toolbar.setLayoutStrategy(ToolbarLayoutStrategy.NOWRAP_STRATEGY);
     toolbar.setTargetComponent(editorEx.getComponent());
     toolbar.getComponent().setBorder(JBUI.Borders.empty());
     return toolbar;
