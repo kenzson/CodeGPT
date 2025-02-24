@@ -28,11 +28,11 @@
         <postStartupActivity implementation="ee.carlrobert.codegpt.CodeGPTProjectActivity"/>
         <postStartupActivity implementation="ee.carlrobert.codegpt.CodeGPTUpdateActivity"/>
         <editorFactoryListener implementation="ee.carlrobert.codegpt.CodeGPTEditorFactoryListener"/>
-        <applicationConfigurable id="settings.codegpt" parentId="tools" displayName="CodeGPT"
+        <applicationConfigurable id="settings.codegpt" parentId="tools" displayName="ProxyAI"
             instance="ee.carlrobert.codegpt.settings.GeneralSettingsConfigurable"/>
         <applicationConfigurable id="settings.codegpt.services" parentId="settings.codegpt" displayName="Providers"
           instance="ee.carlrobert.codegpt.settings.service.ServiceConfigurable"/>
-        <applicationConfigurable id="settings.codegpt.services.codegpt" parentId="settings.codegpt.services" displayName="CodeGPT"
+        <applicationConfigurable id="settings.codegpt.services.codegpt" parentId="settings.codegpt.services" displayName="ProxyAI"
           instance="ee.carlrobert.codegpt.settings.service.codegpt.CodeGPTServiceConfigurable"/>
         <applicationConfigurable id="settings.codegpt.services.openai" parentId="settings.codegpt.services" displayName="OpenAI"
           instance="ee.carlrobert.codegpt.settings.service.OpenAIServiceConfigurable"/>
@@ -78,7 +78,7 @@
         <inline.completion.provider
           id="CodeGPTInlineCompletionProvider"
           implementation="ee.carlrobert.codegpt.codecompletions.DebouncedCodeCompletionProvider"/>
-        <toolWindow id="CodeGPT" icon="ee.carlrobert.codegpt.Icons.DefaultSmall" anchor="right"
+        <toolWindow id="ProxyAI" icon="ee.carlrobert.codegpt.Icons.DefaultSmall" anchor="right"
             factoryClass="ee.carlrobert.codegpt.toolwindow.ProjectToolWindowFactory"/>
         <notificationGroup id="CodeGPT Notification Group" displayType="BALLOON" key="notification.group.name"/>
         <notificationGroup id="CodeGPT Notification Group Sticky" displayType="STICKY_BALLOON" key="notification.group.sticky.name"/>
@@ -130,7 +130,7 @@
 
         <group id="CodeGPTEditorPopup">
             <group id="action.editor.group.EditorActionGroup"
-                text="CodeGPT"
+                text="ProxyAI"
                 class="com.intellij.openapi.actionSystem.DefaultActionGroup"
                 popup="true"
                 icon="ee.carlrobert.codegpt.Icons.DefaultSmall">
