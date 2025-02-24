@@ -53,8 +53,9 @@ class UserInputHeaderPanel(
     private val emptyText = JBLabel("No context included").apply {
         foreground = JBUI.CurrentTheme.Label.disabledForeground()
         font = JBUI.Fonts.smallFont()
-        border = JBUI.Borders.empty(3, 4)
         isVisible = getSelectedEditor(project) == null
+        preferredSize = Dimension(preferredSize.width, 20)
+        verticalAlignment = JBLabel.CENTER
     }
     private val selectionTagPanel = SelectionTagPanel(project, promptTextField)
     private val defaultHeaderTagsPanel = CustomFlowPanel().apply {
@@ -80,12 +81,14 @@ class UserInputHeaderPanel(
         val selectedTags = tagManager.getTags().filter { it.selected }.toMutableList()
 
         val selectedFile = getSelectedFile()
-        if (selectedFileTagPanel.isVisible && selectedFileTagPanel.tagDetails.selected && selectedFile != null) {
+        if (selectedFileTagPanel.isVisible && selectedFileTagPanel.isSelected && selectedFile != null) {
             selectedTags.add(FileTagDetails(selectedFile))
         }
 
         (selectionTagPanel.tagDetails as? SelectionTagDetails)?.let {
-            selectedTags.add(it)
+            if (!it.selectedText.isNullOrEmpty()) {
+                selectedTags.add(it)
+            }
         }
 
         return selectedTags
@@ -305,10 +308,8 @@ class UserInputHeaderPanel(
     private inner class IncludedFilesListener : IncludeFilesInContextNotifier {
         override fun filesIncluded(includedFiles: MutableList<VirtualFile>) {
             includedFiles
-                .filterNot { tagManager.isFileTagExists(it) }
-                .forEach {
-                    tagManager.addTag(FileTagDetails(it))
-                }
+                .filterNot { tagManager.isFileTagExists(it) || getSelectedFile() == it }
+                .forEach { tagManager.addTag(FileTagDetails(it)) }
         }
     }
 }
