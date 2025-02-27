@@ -135,14 +135,14 @@
                 popup="true"
                 icon="ee.carlrobert.codegpt.Icons.DefaultSmall">
                 <action
-                  id="ProxyAI.NewChat"
+                  id="CodeGPT.NewChat"
                   class="ee.carlrobert.codegpt.actions.editor.OpenNewChatAction"
                   text="New Chat"
                   description="Creates a new chat session">
                     <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift N" replace-all="true"/>
                 </action>
                 <action
-                  id="ProxyAI.ContextMenuEditCodeAction"
+                  id="CodeGPT.ContextMenuEditCodeAction"
                   text="Edit Code"
                   description="Edit code from editor's context menu"
                   class="ee.carlrobert.codegpt.actions.editor.EditCodeContextMenuAction">
@@ -155,7 +155,7 @@
                     <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift Q" replace-all="true"/>
                 </action>
                 <separator/>
-                <group id="ProxyAI.MyEditorActionsGroup"
+                <group id="CodeGPT.MyEditorActionsGroup"
                   text="My Actions"
                   class="com.intellij.openapi.actionSystem.DefaultActionGroup">
                 </group>
@@ -163,19 +163,19 @@
             <add-to-group group-id="EditorPopupMenu1" anchor="first"/>
             <separator/>
         </group>
-        <action id="ProxyAI.TriggerEditorPopup"
+        <action id="CodeGPT.TriggerEditorPopup"
           class="ee.carlrobert.codegpt.actions.editor.ShowEditorActionGroupAction"
           text="Show CodeGPT Actions">
             <keyboard-shortcut first-keystroke="ctrl shift alt m" keymap="$default"/>
         </action>
-        <group id="ProxyAI.ProjectViewPopupMenuRootGroup">
-            <group id="ProxyAI.ProjectViewPopupMenuGroup"
-              text="ProxyAI"
+        <group id="CodeGPT.ProjectViewPopupMenuRootGroup">
+            <group id="CodeGPT.ProjectViewPopupMenuGroup"
+              text="CodeGPT"
               class="com.intellij.openapi.actionSystem.DefaultActionGroup"
               popup="true"
               icon="ee.carlrobert.codegpt.Icons.DefaultSmall">
                 <action
-                  id="ProxyAI.IncludeFilesInContextAction"
+                  id="CodeGPT.IncludeFilesInContextAction"
                   text="Include Files In Prompt"
                   class="ee.carlrobert.codegpt.actions.IncludeFilesInContextAction" />
             </group>
@@ -186,10 +186,10 @@
             <separator/>
         </group>
 
-        <group id="ProxyAI.VcsLogContextMenu">
+        <group id="CodeGPT.VcsLogContextMenu">
             <separator/>
             <action
-              id="ProxyAI.ExplainGitCommitAction"
+              id="CodeGPT.ExplainGitCommitAction"
               class="ee.carlrobert.codegpt.actions.ExplainGitCommitAction"/>
             <add-to-group
               group-id="Vcs.Log.ContextMenu"
@@ -198,9 +198,9 @@
             <separator/>
         </group>
 
-        <group id="ProxyAI.FloatingCodeToolbarMenuRootGroup">
+        <group id="CodeGPT.FloatingCodeToolbarMenuRootGroup">
             <action
-              id="ProxyAI.FloatingMenuEditCodeAction"
+              id="CodeGPT.FloatingMenuEditCodeAction"
               text="Edit Code"
               description="Edit code from editor's floating menu"
               class="ee.carlrobert.codegpt.actions.editor.EditCodeFloatingMenuAction">
@@ -214,14 +214,14 @@
         </group>
 
         <action
-          id="ProxyAI.AddSelectionToContext"
+          id="CodeGPT.AddSelectionToContext"
           class="ee.carlrobert.codegpt.actions.editor.AddSelectionToContextAction"
           text="Include Selection in Prompt"
           description="Adds the selected text to the CodeGPT context">
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift I" replace-all="true"/>
 
-            <add-to-group group-id="action.editor.group.EditorActionGroup" anchor="after" relative-to-action="ProxyAI.NewChat"/>
-            <add-to-group group-id="ProxyAI.FloatingCodeToolbarMenuRootGroup" anchor="after" relative-to-action="ProxyAI.FloatingMenuEditCodeAction"/>
+            <add-to-group group-id="action.editor.group.EditorActionGroup" anchor="after" relative-to-action="CodeGPT.NewChat"/>
+            <add-to-group group-id="CodeGPT.FloatingCodeToolbarMenuRootGroup" anchor="after" relative-to-action="CodeGPT.FloatingMenuEditCodeAction"/>
         </action>
 
         <action
@@ -291,22 +291,22 @@
             <reference id="statusbar.enableCompletions" />
         </group>
 
-        <group id="ProxyAI.GenerateGitCommitMessageGroup"
-               text="ProxyAI"
+        <group id="CodeGPT.GenerateGitCommitMessageGroup"
+               text="CodeGPT"
                popup="true"
                icon="ee.carlrobert.codegpt.Icons.DefaultSmall">
             <add-to-group group-id="Vcs.MessageActionGroup" anchor="first"/>
             <action
-                id="ProxyAI.GenerateGitCommitMessage"
+                id="CodeGPT.GenerateGitCommitMessage"
                 text="Generate Commit Message"
                 class="ee.carlrobert.codegpt.actions.GenerateCommitMessageAction"/>
             <action
-                id="ProxyAI.GenerateGitCommitMessageWithAdditionalInput"
+                id="CodeGPT.GenerateGitCommitMessageWithAdditionalInput"
                 text="Generate Commit Message with Additional Input"
                 class="ee.carlrobert.codegpt.actions.GenerateCommitMessageWithAdditionalInputAction"/>
             <separator/>
             <action
-              id="ProxyAI.ReviewChanges"
+              id="CodeGPT.ReviewChanges"
               text="Review Changes"
               class="ee.carlrobert.codegpt.actions.ReviewChangesAction"/>
         </group>
